@@ -112,15 +112,15 @@ class UnetModel(nn.Module):
         output = input
         # Apply down-sampling layers
         for layer in self.down_sample_layers:
-            output = layer(output)
+            output = layer(output) + output
             stack.append(output)
             output = F.max_pool2d(output, kernel_size=2)
 
-        output = self.conv(output)
+        output = self.conv(output) + output
 
         # Apply up-sampling layers
         for layer in self.up_sample_layers:
             output = F.interpolate(output, scale_factor=2, mode='bilinear', align_corners=False)
             output = torch.cat([output, stack.pop()], dim=1)
-            output = layer(output)
+            output = layer(output) + output
         return self.conv2(output)
